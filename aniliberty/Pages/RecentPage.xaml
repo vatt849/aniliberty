@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page x:Class="aniliberty.Pages.RecentPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:aniliberty.Pages"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:releases="using:aniliberty.Api.Data.Releases"
+      mc:Ignorable="d"
+      SizeChanged="Page_SizeChanged"
+      Loaded="Page_Loaded">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Docked Progress Bar at Top -->
+        <ProgressBar Grid.Row="0"
+                     IsIndeterminate="True"
+                     ShowPaused="False"
+                     ShowError="False"
+                     x:Name="LoaderBar" />
+
+        <!-- Main Content Area -->
+        <Frame Grid.Row="1"
+               x:Name="MainContentFrame">
+
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                          HorizontalScrollMode="Disabled"
+                          VerticalScrollBarVisibility="Auto"
+                          VerticalScrollMode="Enabled">
+                <Grid Padding="36">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <InfoBar x:Name="ErrorInfo"
+                             Severity="Error"
+                             Title="Title"
+                             Message="Essential app message for your users to be informed of, acknowledge, or take action on."
+                             Closing="ErrorInfo_Closing">
+                        <InfoBar.IconSource>
+                            <SymbolIconSource Symbol="Important" />
+                        </InfoBar.IconSource>
+                    </InfoBar>
+                    <Grid RowSpacing="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="360" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Row="0"
+                                    Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    CornerRadius="{StaticResource ControlCornerRadius}"
+                                    Spacing="16"
+                                    Padding="16">
+                            <Border Height="Auto">
+                                <TextBlock Text="Ожидаются сегодня"
+                                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                           Padding="12,12"
+                                           Style="{StaticResource TitleTextBlockStyle}"
+                                           HorizontalAlignment="Left"
+                                           RelativePanel.AlignHorizontalCenterWithPanel="True" />
+                            </Border>
+                            <ItemsView x:Name="ScheduleView"
+                                       Height="Auto"
+                                       BorderThickness="0"
+                                       BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                                       ItemsSource="{x:Bind CalendarData, Mode=OneWay}"
+                                       SelectionMode="None"
+                                       ItemInvoked="ScheduleView_ItemInvoked"
+                                       IsItemInvokedEnabled="True"
+                                       Margin="0,0,0,0"
+                                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                       ScrollViewer.HorizontalScrollMode="Enabled"
+                                       ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                       ScrollViewer.VerticalScrollMode="Disabled"
+                                       PointerPressed="ScheduleView_PointerPressed"
+                                       PointerMoved="ScheduleView_PointerMoved"
+                                       PointerReleased="ScheduleView_PointerReleased">
+                                <ItemsView.Layout>
+                                    <StackLayout Spacing="8"
+                                                 Orientation="Horizontal" />
+                                </ItemsView.Layout>
+                                <ItemsView.ItemTemplate>
+                                    <DataTemplate x:DataType="releases:Release">
+                                        <ItemContainer AutomationProperties.Name="{x:Bind ID}">
+                                            <Grid>
+                                                <Image Width="175"
+                                                       Source="{x:Bind PosterUrl}"
+                                                       Stretch="UniformToFill"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                            </Grid>
+                                        </ItemContainer>
+                                    </DataTemplate>
+                                </ItemsView.ItemTemplate>
+                            </ItemsView>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Row="1"
+                                    Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    CornerRadius="{StaticResource ControlCornerRadius}"
+                                    Spacing="16"
+                                    Padding="16">
+                            <Border Height="Auto">
+                                <TextBlock Text="Последние обновления"
+                                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                           Padding="12,12"
+                                           Style="{StaticResource TitleTextBlockStyle}"
+                                           HorizontalAlignment="Left"
+                                           RelativePanel.AlignHorizontalCenterWithPanel="True" />
+                            </Border>
+                            <ItemsView x:Name="ReleasesView"
+                                       Height="Auto"
+                                       BorderThickness="0"
+                                       BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                                       ItemsSource="{x:Bind ReleasesData, Mode=OneWay}"
+                                       SelectionMode="None"
+                                       ItemInvoked="ReleasesView_ItemInvoked"
+                                       IsItemInvokedEnabled="True"
+                                       Margin="0,0,0,0"
+                                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                       ScrollViewer.HorizontalScrollMode="Enabled"
+                                       ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                       ScrollViewer.VerticalScrollMode="Disabled"
+                                       PointerPressed="ReleasesView_PointerPressed"
+                                       PointerMoved="ReleasesView_PointerMoved"
+                                       PointerReleased="ReleasesView_PointerReleased">
+                                <ItemsView.Layout>
+                                    <StackLayout Spacing="8"
+                                                 Orientation="Horizontal" />
+                                </ItemsView.Layout>
+                                <ItemsView.ItemTemplate>
+                                    <DataTemplate x:DataType="releases:Release">
+                                        <ItemContainer AutomationProperties.Name="{x:Bind ID}">
+                                            <Grid MaxWidth="500"
+                                                  Background="Black">
+                                                <Image Source="{x:Bind PosterUrl}"
+                                                       Stretch="UniformToFill"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Opacity="0.75">
+                                                </Image>
+                                                <Border Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
+                                                        Opacity="1"
+                                                        Height="100"
+                                                        Padding="5,1,5,1"
+                                                        VerticalAlignment="Bottom">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="*" />
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0"
+                                                                   Text="{x:Bind Title}"
+                                                                   Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                        <TextBlock Grid.Row="1"
+                                                                   Text="{x:Bind ShortDescription}"
+                                                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                                   TextWrapping="Wrap"
+                                                                   HorizontalAlignment="Stretch"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   MaxLines="3" />
+                                                    </Grid>
+                                                </Border>
+                                            </Grid>
+                                        </ItemContainer>
+                                    </DataTemplate>
+                                </ItemsView.ItemTemplate>
+                            </ItemsView>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
+        </Frame>
+    </Grid>
+</Page>

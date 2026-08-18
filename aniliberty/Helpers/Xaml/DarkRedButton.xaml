@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Явно определяем ресурс SharedShadow -->
+    <ThemeShadow x:Key="SharedShadow" />
+
+    <Style x:Key="DarkRedButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource DefaultButtonStyle}">
+        <!-- Базовые настройки (применяются всегда) -->
+        <Setter Property="Background"
+                Value="{ThemeResource DarkRedAcrylicBrush}" />
+        <Setter Property="Foreground"
+                Value="White" />
+        <Setter Property="BorderBrush"
+                Value="#5C0000" />
+        <Setter Property="BorderThickness"
+                Value="1" />
+        <Setter Property="CornerRadius"
+                Value="{ThemeResource ControlCornerRadius}" />
+        <Setter Property="Shadow"
+                Value="{StaticResource SharedShadow}" />
+        <Setter Property="Padding"
+                Value="12,6" />
+
+        <!-- Переопределяем визуальные состояния -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <!-- Здесь должен быть стандартный шаблон кнопки с VisualStateManager -->
+                    <!-- Проще всего скопировать стандартный шаблон из Generic.xaml и изменить кисти -->
+                    <!-- Но можно сделать проще: использовать ContentPresenter и кастомизировать состояния -->
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder"
+                                                                       Storyboard.TargetProperty="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="#A52A2A" />
+                                            <!-- светлее при наведении -->
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder"
+                                                                       Storyboard.TargetProperty="BorderBrush">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="#7A0000" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder"
+                                                                       Storyboard.TargetProperty="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="#5C0000" />
+                                            <!-- темнее при нажатии -->
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder"
+                                                                       Storyboard.TargetProperty="BorderBrush">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="#3A0000" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder"
+                                                                       Storyboard.TargetProperty="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="#CCCCCC" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter"
+                                                                       Storyboard.TargetProperty="Foreground">
+                                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                                    Value="Gray" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <!-- Остальные группы (Focus, etc.) можно не трогать, они наследуются -->
+                        </VisualStateManager.VisualStateGroups>
+
+                        <!-- Основная визуальная структура -->
+                        <Border x:Name="BackgroundBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}" />
+                        <ContentPresenter x:Name="ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Margin="{TemplateBinding Padding}" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <AcrylicBrush x:Key="DarkRedAcrylicBrush"
+                          TintColor="#A52A2A"
+                          TintOpacity="0.9"
+                          TintLuminosityOpacity="0.4"
+                          FallbackColor="#7A0000" />
+            
+            <!--<Style x:Key="DarkRedButtonStyle"
+                   TargetType="Button"
+                   BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background"
+                        Value="#8B0000" />
+                <Setter Property="Foreground"
+                        Value="White" />
+                <Setter Property="BorderBrush"
+                        Value="#5C0000" />
+                --><!-- Остальные сеттеры, как в примере выше --><!--
+            </Style>-->
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <AcrylicBrush x:Key="DarkRedAcrylicBrush"
+                          TintColor="#8B0000"
+                          TintOpacity="0.9"
+                          TintLuminosityOpacity="0.5"
+                          FallbackColor="#5C0000" />
+            
+            <!--<Style x:Key="DarkRedButtonStyle"
+                   TargetType="Button"
+                   BasedOn="{StaticResource DefaultButtonStyle}">
+                --><!-- Здесь можно задать чуть более светлый оттенок для тёмной темы --><!--
+                <Setter Property="Background"
+                        Value="#A52A2A" />
+                <Setter Property="Foreground"
+                        Value="White" />
+                <Setter Property="BorderBrush"
+                        Value="#6B0000" />
+            </Style>-->
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

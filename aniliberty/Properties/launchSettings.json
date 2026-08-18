@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "aniliberty (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "aniliberty (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

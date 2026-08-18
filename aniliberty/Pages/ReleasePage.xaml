@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page x:Class="aniliberty.Pages.ReleasePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:aniliberty.Pages"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:releases="using:aniliberty.Api.Data.Releases"
+      xmlns:episodes="using:aniliberty.Api.Data.Releases.Episodes"
+      mc:Ignorable="d"
+      SizeChanged="Page_SizeChanged"
+      Loaded="Page_Loaded">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Docked Progress Bar at Top -->
+        <ProgressBar Grid.Row="0"
+                     IsIndeterminate="True"
+                     ShowPaused="False"
+                     ShowError="False"
+                     x:Name="LoaderBar" />
+
+        <!-- Main Content Area -->
+        <Frame Grid.Row="1"
+               x:Name="MainContentFrame"
+               SizeChanged="MainContentFrame_SizeChanged">
+
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                          HorizontalScrollMode="Disabled"
+                          VerticalScrollBarVisibility="Auto"
+                          VerticalScrollMode="Enabled">
+                <Grid Padding="36">
+                    <InfoBar x:Name="ErrorInfo"
+                             Severity="Error"
+                             Title="Title"
+                             Message="Essential app message for your users to be informed of, acknowledge, or take action on."
+                             Closing="ErrorInfo_Closing">
+                        <InfoBar.IconSource>
+                            <SymbolIconSource Symbol="Important" />
+                        </InfoBar.IconSource>
+                    </InfoBar>
+                    <Grid x:Name="ContentGrid"
+                          RowSpacing="16"
+                          ColumnSpacing="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="350" />
+                            <ColumnDefinition Width="*"
+                                              MinWidth="350" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid x:Name="TitleGrid"
+                              Grid.Row="0"
+                              Grid.ColumnSpan="2"
+                              Padding="12"
+                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                              Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                              CornerRadius="{StaticResource ControlCornerRadius}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Строка 1: TitleName + кнопка копирования -->
+                            <Grid Grid.Row="0"
+                                  Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock x:Name="TitleName"
+                                           Grid.Column="0"
+                                           Style="{StaticResource TitleTextBlockStyle}"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Stretch" />
+
+                                <Button Grid.Column="1"
+                                        ToolTipService.ToolTip="Копировать название"
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Tag="TitleName"
+                                        Click="CopyBtn_Click">
+                                    <SymbolIcon Symbol="Copy" />
+                                </Button>
+                            </Grid>
+
+                            <!-- Строка 2: TitleNameEn + кнопка копирования -->
+                            <Grid Grid.Row="1"
+                                  Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock x:Name="TitleNameEn"
+                                           Grid.Column="0"
+                                           Style="{StaticResource SubtitleTextBlockStyle}"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Stretch" />
+
+                                <Button Grid.Column="1"
+                                        ToolTipService.ToolTip="Копировать оригинальное название"
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Tag="TitleNameEn"
+                                        Click="CopyBtn_Click">
+                                    <SymbolIcon Symbol="Copy" />
+                                </Button>
+                            </Grid>
+                        </Grid>
+
+                        <Border x:Name="ImagePanel"
+                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Width="350"
+                                HorizontalAlignment="Left">
+                            <Grid Width="350">
+                                <!-- The background image (declared first) -->
+                                <Image x:Name="TitleImage"
+                                       Source="ms-appx:///Assets/AppLogo.png"
+                                       Stretch="Uniform"
+                                       Height="Auto"
+                                       Width="350"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                                <!-- The overlay button (declared second so it sits on top) -->
+                                <Button x:Name="PlayBtn"
+                                        Content="Начать просмотр"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Bottom"
+                                        Padding="16,8"
+                                        Margin="16"
+                                        Style="{ThemeResource DarkRedButtonStyle}"
+                                        FontSize="18"
+                                        FontWeight="SemiBold">
+                                </Button>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel x:Name="DetailsPanel"
+                                    CornerRadius="{StaticResource ControlCornerRadius}"
+                                    Padding="12"
+                                    BorderThickness="1"
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    Background="{ThemeResource CardStrokeColorDefaultBrush}">
+                            <TextBlock x:Name="TitleDescription"
+                                       TextWrapping="Wrap"
+                                       HorizontalAlignment="Stretch"
+                                       Style="{StaticResource BodyTextBlockStyle}" />
+
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8"
+                                        Padding="16">
+                                <Button x:Name="FavBtn"
+                                        CornerRadius="{StaticResource ControlCornerRadius}"
+                                        Padding="12"
+                                        BorderThickness="1"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="8">
+                                        <FontIcon Glyph="&#xE734;" />
+                                        <TextBlock x:Name="FavBtnText" />
+                                    </StackPanel>
+                                </Button>
+                                <Border CornerRadius="{StaticResource ControlCornerRadius}"
+                                        Padding="12"
+                                        BorderThickness="1"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <TextBlock x:Name="TitleYear"
+                                               Style="{StaticResource BodyTextBlockStyle}" />
+                                </Border>
+
+                                <Border CornerRadius="{StaticResource ControlCornerRadius}"
+                                        Padding="12"
+                                        BorderThickness="1"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <TextBlock x:Name="TitleType"
+                                               Style="{StaticResource BodyTextBlockStyle}" />
+                                </Border>
+
+                                <Border CornerRadius="{StaticResource ControlCornerRadius}"
+                                        Padding="12"
+                                        BorderThickness="1"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <TextBlock x:Name="TitleStatus"
+                                               Style="{StaticResource BodyTextBlockStyle}" />
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel x:Name="EpisodesPanel"
+                                    CornerRadius="{StaticResource ControlCornerRadius}"
+                                    Padding="12"
+                                    BorderThickness="1"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    Orientation="Vertical"
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Spacing="8">
+                            <Border CornerRadius="{StaticResource ControlCornerRadius}"
+                                    Padding="12"
+                                    BorderThickness="1"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                <StackPanel x:Name="ProgressPanel"
+                                            Orientation="Vertical"
+                                            Spacing="8">
+                                    <TextBlock x:Name="EpisodesProgressText"
+                                               Text="Не просмотрено ни одного эпизода"
+                                               FontSize="12"
+                                               Style="{ThemeResource CaptionTextBlockStyle}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               LineHeight="20" />
+                                    <ProgressBar x:Name="EpisodesProgress"
+                                                 HorizontalAlignment="Stretch"
+                                                 VerticalAlignment="Center"
+                                                 Value="{x:Bind ViewedPercent, Mode=OneWay}" />
+                                </StackPanel>
+                            </Border>
+                            <ListView x:Name="EpisodesList"
+                                      BorderThickness="0"
+                                      BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                                      ItemsSource="{x:Bind Episodes, Mode=OneWay}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      SelectionMode="None"
+                                      IsItemClickEnabled="True"
+                                      ItemClick="EpisodesList_ItemClick">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="episodes:Episode">
+                                        <Grid Margin="0,12,0,12"
+                                              AutomationProperties.Name="{x:Bind Title}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto"
+                                                                  MinWidth="150" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Margin="12,0,0,0"
+                                                        Grid.Column="0">
+                                                <TextBlock Text="{x:Bind Title}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Style="{ThemeResource TitleTextBlockStyle}"
+                                                           HorizontalAlignment="Left"
+                                                           Margin="0,0,0,6"
+                                                           LineHeight="20" />
+                                                <TextBlock Text="{x:Bind HLSDescr}"
+                                                           FontSize="12"
+                                                           Style="{ThemeResource CaptionTextBlockStyle}"
+                                                           HorizontalAlignment="Left"
+                                                           Margin="0,0,0,6"
+                                                           LineHeight="20" />
+                                                <StackPanel Orientation="Horizontal">
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <Grid Grid.Column="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"
+                                                                      MinWidth="50" />
+                                                    <ColumnDefinition Width="Auto"
+                                                                      MinWidth="100" />
+                                                </Grid.ColumnDefinitions>
+                                                <FontIcon x:Name="ViewedMark"
+                                                          Tag="{x:Bind Ordinal}"
+                                                          Glyph="&#xE73E;"
+                                                          Visibility="{Binding Viewed}"
+                                                          Grid.Column="0" />
+                                                <DropDownButton AutomationProperties.Name="Actions"
+                                                                Grid.Column="1">
+                                                    <DropDownButton.Content>
+                                                        <FontIcon Glyph="&#xE712;" />
+                                                    </DropDownButton.Content>
+                                                    <DropDownButton.Flyout>
+                                                        <MenuFlyout Placement="Bottom">
+                                                            <MenuFlyoutItem x:Name="EpisodeMarkViewed"
+                                                                            Text="Пометить как просмотренное"
+                                                                            Click="EpisodeMarkViewed_Click"
+                                                                            Tag="{x:Bind Ordinal}"
+                                                                            IsEnabled="{x:Bind NotViewed, Mode=OneWay}">
+                                                                <MenuFlyoutItem.Icon>
+                                                                    <FontIcon Glyph="&#xE73E;" />
+                                                                </MenuFlyoutItem.Icon>
+                                                            </MenuFlyoutItem>
+                                                            <MenuFlyoutItem x:Name="EpisodeUnmarkViewed"
+                                                                            Text="Снять отметку о просмотре"
+                                                                            Click="EpisodeUnmarkViewed_Click"
+                                                                            Tag="{x:Bind Ordinal}"
+                                                                            IsEnabled="{x:Bind Viewed, Mode=OneWay}">
+                                                                <MenuFlyoutItem.Icon>
+                                                                    <FontIcon Glyph="&#xE8BB;" />
+                                                                </MenuFlyoutItem.Icon>
+                                                            </MenuFlyoutItem>
+                                                        </MenuFlyout>
+                                                    </DropDownButton.Flyout>
+                                                </DropDownButton>
+                                            </Grid>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
+        </Frame>
+    </Grid>
+</Page>

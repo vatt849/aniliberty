@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page x:Class="aniliberty.Pages.PlayerPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:aniliberty.Pages"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:fl="using:FlyleafLib.Controls.WinUI"
+      xmlns:ax="using:aniliberty.Helpers.Xaml"
+      mc:Ignorable="d">
+    <Page.Resources>
+        <fl:TicksToTimeConverter x:Key="TicksToTime" />
+        <fl:TicksToSecondsConverter x:Key="TicksToSeconds" />
+        <ax:LongToDoubleConverter x:Key="LongToDouble" />
+        <ax:DoubleToTimeConverter x:Key="DoubleToTime" />
+    </Page.Resources>
+
+    <Grid x:Name="rootGrid">
+        <InfoBar x:Name="ErrorInfo"
+                 Severity="Error"
+                 Title="Title"
+                 Message="Essential app message for your users to be informed of, acknowledge, or take action on."
+                 Closing="ErrorInfo_Closing">
+            <InfoBar.IconSource>
+                <SymbolIconSource Symbol="Important" />
+            </InfoBar.IconSource>
+        </InfoBar>
+
+        <fl:FullScreenContainer x:Name="FSC"
+                                FullScreenEnter="FSC_FullScreenEnter"
+                                FullScreenExit="FSC_FullScreenExit">
+            <fl:FlyleafHost x:Name="flyleafHost"
+                            Player="{x:Bind Player, Mode=OneWay}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ProgressRing x:Name="playerLoader"
+                                  IsActive="True"
+                                  Background="LightGray"
+                                  Grid.Row="0"
+                                  Visibility="Collapsed" />
+                    <Grid VerticalAlignment="Bottom"
+                          Background="#A3000000"
+                          Margin="0 0 0 0"
+                          Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Grid Margin="8,0,8,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!--Current Time | Slider | Duration-->
+                            <TextBlock Grid.Column="0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Text="{x:Bind Player.CurTime, Mode=OneWay, Converter={StaticResource TicksToTime}}" />
+
+                            <Slider x:Name="timelineSlider"
+                                    IsTabStop="False"
+                                    Grid.Column="1"
+                                    Margin="10,0,10,0"
+                                    VerticalAlignment="Center"
+                                    IsThumbToolTipEnabled="True"
+                                    ThumbToolTipValueConverter="{StaticResource DoubleToTime}"
+                                    Maximum="{x:Bind Player.Duration, Mode=OneWay, Converter={StaticResource LongToDouble}}"
+                                    ValueChanged="TimelineSlider_ValueChanged" />
+
+                            <TextBlock Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Text="{x:Bind Player.Duration, Mode=OneWay, Converter={StaticResource TicksToTime}}" />
+                        </Grid>
+
+                        <Grid Grid.Row="1"
+                              Margin="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0"
+                                        Orientation="Horizontal"
+                                        Spacing="16"
+                                        VerticalAlignment="Center">
+                                <Button Style="{StaticResource DefaultButtonStyle}">
+                                    <Button.Flyout>
+                                        <MenuFlyout>
+                                            <RadioMenuFlyoutItem Text="{x:Bind Data.Episode.Title}"
+                                                                 GroupName="Playlist"
+                                                                 Tag="{x:Bind Data.Episode.Ordinal}" />
+                                        </MenuFlyout>
+                                    </Button.Flyout>
+
+                                    <FontIcon Glyph="&#xE8BC;" />
+                                </Button>
+                                
+                                <TextBlock Text="{x:Bind Data.Episode.Title}"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           FontSize="16" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <Button x:Name="btnPrev"
+                                        IsTabStop="False"
+                                        Command="{x:Bind PlayerPrevCommand}"
+                                        Margin="4 0">
+                                    <SymbolIcon Symbol="Previous" />
+                                </Button>
+                                <Button x:Name="btnSeekPrev"
+                                        IsTabStop="False"
+                                        Command="{x:Bind Player.Commands.SeekBackward}"
+                                        Margin="4 0">
+                                    <FontIcon Glyph="&#xED3C;" />
+                                </Button>
+                                <Button x:Name="btnPlayback"
+                                        IsTabStop="False"
+                                        Command="{x:Bind Player.Commands.TogglePlayPause}"
+                                        IsEnabled="{x:Bind Player.CanPlay, Mode=OneWay}" />
+                                <Button  x:Name="btnSeekNext"
+                                         IsTabStop="False"
+                                         Command="{x:Bind Player.Commands.SeekForward3}"
+                                         Margin="4 0">
+                                    <FontIcon Glyph="&#xED3D;" />
+                                </Button>
+                                <Button  x:Name="btnNext"
+                                         IsTabStop="False"
+                                         Command="{x:Bind PlayerNextCommand}"
+                                         Margin="4 0">
+                                    <SymbolIcon Symbol="Next" />
+                                </Button>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        Spacing="10"
+                                        VerticalAlignment="Center">
+                                <Button>
+                                    <Button.Flyout>
+                                        <MenuFlyout>
+                                            <RadioMenuFlyoutItem Text="HD 1080"
+                                                                 GroupName="VideoQuality"
+                                                                 Tag="1080"
+                                                                 Click="VideoQualityMenuItem_Click" />
+                                            <RadioMenuFlyoutItem Text="HD 720"
+                                                                 Tag="720"
+                                                                 GroupName="VideoQuality"
+                                                                 Click="VideoQualityMenuItem_Click" />
+                                            <RadioMenuFlyoutItem Text="SD 480"
+                                                                 Tag="480"
+                                                                 GroupName="VideoQuality"
+                                                                 Click="VideoQualityMenuItem_Click" />
+                                            <RadioMenuFlyoutItem Text="torrent"
+                                                                 Tag="torrent"
+                                                                 GroupName="VideoQuality"
+                                                                 Click="VideoQualityMenuItem_Click" />
+                                        </MenuFlyout>
+                                    </Button.Flyout>
+
+                                    <FontIcon Glyph="&#xE714;" />
+                                </Button>
+                                <ToggleButton x:Name="toggleMute"
+                                              IsTabStop="False"
+                                              Command="{x:Bind Player.Commands.ToggleMute}">
+                                    <SymbolIcon Symbol="Mute" />
+                                </ToggleButton>
+                                <Slider IsTabStop="False"
+                                        Maximum="{x:Bind Player.Config.Audio.VolumeMax, Mode=OneWay}"
+                                        Value="{x:Bind Player.Audio.Volume, Mode=TwoWay}"
+                                        Width="100" />
+                                <Button x:Name="btnFullScreen"
+                                        IsTabStop="False"
+                                        Command="{x:Bind Player.Commands.ToggleFullScreen}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </fl:FlyleafHost>
+        </fl:FullScreenContainer>
+    </Grid>
+</Page>
