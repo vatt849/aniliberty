@@ -9,7 +9,7 @@
 
   <Identity
     Name="7a1c7bb9-03a4-4f90-b883-5fc353bba5fe"
-    Publisher="CN=Kettu"
+    Publisher="CN=vatt849"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="7a1c7bb9-03a4-4f90-b883-5fc353bba5fe" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
