@@ -236,9 +236,8 @@ public sealed partial class PlayerPage : Page
 
         Player.OpenAsync(source);
 
-        //Player.Playlist.Selected.Title = currentEp.Title;
-
         Player.Play();
+
     }
 
     [RelayCommand]

@@ -6,6 +6,7 @@ using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
 using Microsoft.Windows.BadgeNotifications;
 using System;
+using System.IO;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -25,6 +26,22 @@ namespace aniliberty
         /// </summary>
         public App()
         {
+            AppDomain.CurrentDomain.FirstChanceException += (sender, e) =>
+            {
+                if (e.Exception is TypeInitializationException tie &&
+                    tie.TypeName?.Contains("AudioDecoder") == true)
+                {
+                    Debugger.WriteLine("=== FirstChanceException: Ошибка AudioDecoder ===");
+                    Debugger.WriteLine($"Внутреннее исключение: {tie.InnerException}");
+                }
+                else if (e.Exception is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException)
+                {
+                    Debugger.WriteLine($"=== FirstChanceException (Нативная DLL): {e.Exception.GetType().Name} ===");
+                    Debugger.WriteLine($"Сообщение: {e.Exception.Message}");
+                    Debugger.WriteLine($"Стек:\n{e.Exception.StackTrace}");
+                }
+            };
+
             InitializeComponent();
             UnhandledException += HandleExceptions;
 
@@ -33,10 +50,9 @@ namespace aniliberty
 
                 Engine.Start(new EngineConfig()
                 {
-                    FFmpegPath = ":Flyleaf\\FFmpeg",
-                    PluginsPath = ":Flyleaf\\Plugins",
-                    FFmpegLoadProfile = Flyleaf.FFmpeg.LoadProfile.Main,
-
+                    FFmpegPath = Path.Combine(AppContext.BaseDirectory, "Flyleaf", "FFmpeg"),
+                    PluginsPath = Path.Combine(AppContext.BaseDirectory, "Flyleaf", "Plugins"),
+                    FFmpegLoadProfile = Flyleaf.FFmpeg.LoadProfile.All,
 #if RELEASE
                     FFmpegLogLevel      = Flyleaf.FFmpeg.LogLevel.Quiet,
                     LogLevel            = LogLevel.Quiet,
