@@ -1,0 +1,55 @@
+name: Build and Package WinUI 3 App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: aniliberty.slnx # Replace with your solution file name
+      Project_Path: aniliberty/aniliberty.csproj # Replace with your WinUI 3 project path
+      Configuration: Release
+      Platform: x64
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x # Matches your project's target .NET framework
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet Packages
+      run: msbuild ${{ env.Solution_Name }} -t:Restore -p:Configuration=${{ env.Configuration }}
+
+    - name: Decode Signing Certificate
+      shell: powershell
+      run: |
+        # Creates the certificate file locally from GitHub Secrets
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_PFX }}")
+        [System.IO.File]::WriteAllBytes("${{ github.workspace }}\GitHubActionsWorkflow.pfx", $pfx_cert_byte)
+
+    - name: Build and Package MSIX
+      run: |
+        msbuild ${{ env.Project_Path }} `
+          /p:Configuration=${{ env.Configuration }} `
+          /p:Platform=${{ env.Platform }} `
+          /p:UapAppxPackageBuildMode=SideloadOnly `
+          /p:AppxBundle=Never `
+          /p:PackageCertificateKeyFile="${{ github.workspace }}\GitHubActionsWorkflow.pfx" `
+          /p:PackageCertificatePassword="${{ secrets.PFX_PASSWORD }}"
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: WinUI3-MSIX-Package
+        path: AppPackages/
