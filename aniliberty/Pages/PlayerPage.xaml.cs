@@ -234,8 +234,7 @@ public sealed partial class PlayerPage : Page
             return;
         }
 
-        //Player.OpenAsync(source);
-        Player.OpenAsync("F:\\UserData\\Videos\\rmcp1.mp4");
+        Player.OpenAsync(source);
 
         //Player.Playlist.Selected.Title = currentEp.Title;
 
