@@ -94,17 +94,14 @@
                                         HorizontalAlignment="Left">
                                 <Button Style="{StaticResource DefaultButtonStyle}">
                                     <Button.Flyout>
-                                        <MenuFlyout>
-                                            <RadioMenuFlyoutItem Text="{x:Bind Data.Episode.Title}"
-                                                                 GroupName="Playlist"
-                                                                 Tag="{x:Bind Data.Episode.Ordinal}" />
+                                        <MenuFlyout x:Name="playlistFlyout">
                                         </MenuFlyout>
                                     </Button.Flyout>
 
                                     <FontIcon Glyph="&#xE8BC;" />
                                 </Button>
                                 
-                                <TextBlock Text="{x:Bind Data.Episode.Title}"
+                                <TextBlock x:Name="currentEpisodeText"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Center"
                                            FontSize="16"
@@ -152,7 +149,7 @@
                                         HorizontalAlignment="Right">
                                 <Button>
                                     <Button.Flyout>
-                                        <MenuFlyout>
+                                        <MenuFlyout x:Name="videoQualityFlyout">
                                             <RadioMenuFlyoutItem Text="HD 1080"
                                                                  GroupName="VideoQuality"
                                                                  Tag="1080"

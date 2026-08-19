@@ -1,6 +1,5 @@
 ﻿using aniliberty.Api.Data.Releases;
 using aniliberty.Api.Data.Releases.Episodes;
-using FlyleafLib.MediaPlayer;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -30,29 +29,55 @@ internal class PlaylistData
         return Playlist.Where((ep) => ep.Ordinal == Current).FirstOrDefault();
     }
 
+    public Episode? GetNextEpisode()
+    {
+        return Playlist.SkipWhile((ep) => ep.Ordinal == Current).Skip(1).FirstOrDefault();
+    }
+
+    public Episode? GetPrevEpisode()
+    {
+        var currentItem = GetCurrentEpisode();
+        if (currentItem == null) return null;
+
+        int currentIndex = Playlist.IndexOf(currentItem);
+        if (currentIndex <= 0) return null;
+
+        return Playlist[currentIndex - 1];
+    }
+
     public bool CanGoNext()
     {
-        return Playlist.Where((ep) => ep.Ordinal == Current + 1).FirstOrDefault() != null;
+        return GetNextEpisode() != null;
     }
 
     public bool CanGoPrev()
     {
-        return Playlist.Where((ep) => ep.Ordinal == Current - 1).FirstOrDefault() != null;
+        return GetPrevEpisode() != null;
     }
 
     public void GoNext()
     {
-        if (CanGoNext())
+        var epNext = GetNextEpisode();
+        if (epNext is not null)
         {
-            Current++;
+            Current = epNext.Ordinal;
         }
     }
 
     public void GoPrev()
     {
-        if (CanGoPrev())
+        var epPrev = GetPrevEpisode();
+        if (epPrev is not null)
         {
-            Current--;
+            Current = epPrev.Ordinal;
+        }
+    }
+
+    public void Go(decimal epNum)
+    {
+        if (Playlist.Where((ep) => ep.Ordinal == epNum).FirstOrDefault() != null)
+        {
+            Current = epNum;
         }
     }
 }

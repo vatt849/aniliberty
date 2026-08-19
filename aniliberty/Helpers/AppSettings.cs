@@ -36,7 +36,7 @@ internal class AppSettings
     {
         var settings = GetSettings();
 
-        return (string)settings.Values["videoQuality"];
+        return (string)settings.Values["videoQuality"] ?? "1080";
     }
 
     public static void SetVideoQuality(string quality)

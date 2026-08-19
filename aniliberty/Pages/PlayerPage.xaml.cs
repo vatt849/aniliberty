@@ -178,12 +178,49 @@ public sealed partial class PlayerPage : Page
             return;
         }
 
+        playlistFlyout.Items.Clear();
+
+        var currentEp = Data.Episode?.Ordinal ?? Data.Release?.Episodes.First().Ordinal ?? 0;
+
         foreach (var ep in Data.Release?.Episodes ?? [])
         {
             PlaylistData.Playlist.Add(ep);
+
+            var playlistOption = new RadioMenuFlyoutItem
+            {
+                Text = ep.Title,
+                GroupName = "playlist",
+                Tag = ep.Ordinal
+            };
+
+            if (ep.Ordinal == currentEp)
+            {
+                playlistOption.IsChecked = true;
+                currentEpisodeText.Text = ep.Title;
+            }
+
+            playlistOption.Click += PlaylistFlyout_ItemClick;
+
+            playlistFlyout.Items.Add(playlistOption);
         }
 
-        PlaylistData.Current = Data.Episode?.Ordinal ?? Data.Release?.Episodes.First().Ordinal ?? 0;
+        PlaylistData.Current = currentEp;
+    }
+
+    private void PlaylistFlyout_ItemClick(object sender, RoutedEventArgs e)
+    {
+        var item = sender as RadioMenuFlyoutItem;
+        if (item != null)
+        {
+            // Обработка выбора пункта
+            // Выбранный пункт автоматически получит IsChecked = true
+            // Остальные пункты в той же группе автоматически снимут выделение
+            currentEpisodeText.Text = item.Text;
+
+            PlaylistData.Go((decimal)item.Tag);
+
+            PlayerStart();
+        }
     }
 
     private void VideoQualityMenuItem_Click(object sender, RoutedEventArgs e)
@@ -225,6 +262,11 @@ public sealed partial class PlayerPage : Page
             "torrent" => null,
             _ => null
         };
+
+        if (videoQualityFlyout.Items.FirstOrDefault(x => (string)x.Tag == quality) is RadioMenuFlyoutItem videoQualityOption)
+        {
+            videoQualityOption.IsChecked = true;
+        }
 
         Debugger.WriteLine($"current playlist item: {currentEp.ID} - {quality} - {source ?? "null"}");
 
