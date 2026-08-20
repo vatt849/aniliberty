@@ -1,14 +1,11 @@
 using aniliberty.Api;
 using aniliberty.Api.Data.Releases;
 using aniliberty.Api.Exceptions;
-using aniliberty.Helpers;
-using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Windows.Foundation;
 
 // To learn more about WinUI, the WinUI project structure,

@@ -95,18 +95,6 @@ namespace aniliberty
             };
         }
 
-        private void DebugSettings_BindingFailed(object sender, BindingFailedEventArgs e)
-        {
-            // Ignore the exception from NonExistentProperty in BindingPage.xaml, 
-            // as the sample code intentionally includes a binding failure.
-            if (e.Message.Contains("NonExistentProperty"))
-            {
-                return;
-            }
-
-            throw new Exception($"A debug binding failed: " + e.Message);
-        }
-
         /// <summary>
         /// Prevents the app from crashing when a exception gets thrown and notifies the user.
         /// </summary>

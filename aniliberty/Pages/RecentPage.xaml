@@ -134,7 +134,8 @@
                                 </ItemsView.Layout>
                                 <ItemsView.ItemTemplate>
                                     <DataTemplate x:DataType="releases:Release">
-                                        <ItemContainer AutomationProperties.Name="{x:Bind ID}">
+                                        <ItemContainer x:Name="RecentItemContainer"
+                                                       AutomationProperties.Name="{x:Bind ID}">
                                             <Grid MaxWidth="500"
                                                   Background="Black">
                                                 <Image Source="{x:Bind PosterUrl}"
