@@ -45,9 +45,9 @@
 		<Folder Include="Flyleaf\Plugins\SharedLibs\" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Page Update="Helpers\Xaml\DarkRedButton.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
+		<Page Update="Helpers\Xaml\DarkRedButton.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 
 	<!--
@@ -68,5 +68,10 @@
 		<SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
 		<ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
 		<DefaultLanguage>ru-ru</DefaultLanguage>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<SelfContained>true</SelfContained>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
 </Project>
