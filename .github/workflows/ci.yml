@@ -1,0 +1,46 @@
+name: CI Build Check
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch: # возможность запустить проверку вручную
+
+jobs:
+  validate-build:
+    runs-on: windows-latest
+
+    env:
+      Project_Path: aniliberty/aniliberty.csproj
+      Configuration: Release
+      Platform: x64
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet Packages
+        run: |
+          msbuild ${{ env.Project_Path }} `
+            -t:Restore `
+            /p:Configuration=${{ env.Configuration }} `
+            /p:Platform=${{ env.Platform }} `
+            /p:RuntimeIdentifier=win-${{ env.Platform }}
+
+      # Просто проверяем, что проект компилируется (без подписи и генерации MSIX)
+      - name: Compile Project
+        run: |
+          msbuild ${{ env.Project_Path }} `
+            /t:Build `
+            /p:Configuration=${{ env.Configuration }} `
+            /p:Platform=${{ env.Platform }} `
+            /p:RuntimeIdentifier=win-${{ env.Platform }} `
+            /p:SelfContained=true `
+            /p:PublishTrimmed=false

@@ -1,0 +1,103 @@
+name: Release and Package MSIX
+
+on:
+  push:
+    tags:
+      - "v*" # Срабатывает на теги v1.0.0, v0.2.1, v1.0-beta и т.д.
+  workflow_dispatch: # Возможность запустить релизную сборку вручную из вкладки Actions
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    env:
+      Project_Path: aniliberty/aniliberty.csproj
+      Configuration: Release
+      Platform: x64
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet Packages
+        run: |
+          msbuild ${{ env.Project_Path }} `
+            -t:Restore `
+            /p:Configuration=${{ env.Configuration }} `
+            /p:Platform=${{ env.Platform }} `
+            /p:RuntimeIdentifier=win-${{ env.Platform }}
+
+      - name: Decode Signing Certificate
+        shell: powershell
+        run: |
+          if ("${{ secrets.BASE64_PFX }}" -ne "") {
+            $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_PFX }}")
+            [System.IO.File]::WriteAllBytes("${{ github.workspace }}\GitHubActionsWorkflow.pfx", $pfx_cert_byte)
+          }
+
+      - name: Build and Package MSIX
+        run: |
+          msbuild ${{ env.Project_Path }} `
+            /p:Configuration=${{ env.Configuration }} `
+            /p:Platform=${{ env.Platform }} `
+            /p:RuntimeIdentifier=win-${{ env.Platform }} `
+            /p:SelfContained=true `
+            /p:PublishTrimmed=false `
+            /p:GenerateAppxPackageOnBuild=true `
+            /p:AppxPackageSigningEnabled=true `
+            /p:UapAppxPackageBuildMode=SideloadOnly `
+            /p:AppxBundle=Never `
+            /p:PackageCertificateKeyFile="${{ github.workspace }}\GitHubActionsWorkflow.pfx" `
+            /p:PackageCertificatePassword="${{ secrets.PFX_PASSWORD }}"
+
+      # Копируем чистый .msix и публичный сертификат .cer
+      - name: Prepare Release Files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path output
+          Get-ChildItem -Path aniliberty/AppPackages -Filter *.msix -Recurse | Copy-Item -Destination output/
+          Get-ChildItem -Path aniliberty/AppPackages -Filter *.cer -Recurse | Copy-Item -Destination output/
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: aniliberty-${{ github.ref_name }}-win-x64
+          path: output/*
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: AniLiberty ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            output/*.msix
+            output/*.cer
+          body: |
+            ### 📦 Инструкция по установке (Windows 10 / 11)
+
+            Так как приложение подписано самоподписанным сертификатом разработчика, перед первой установкой необходимо один раз добавить сертификат в систему:
+
+            1. **Скачайте файлы:** загрузите прикрепленные ниже файлы `.cer` (сертификат) и `.msix` (установщик приложения).
+            2. **Установите сертификат:**
+              - Дважды кликните по скачанному файлу `.cer` и нажмите **«Установить сертификат...»**.
+              - Выберите **«Локальный компьютер»** *(потребуются права администратора)* или **«Текущий пользователь»** $\rightarrow$ нажмите *Далее*.
+              - Выберите **«Поместить все сертификаты в следующее хранилище»** $\rightarrow$ нажмите *Обзор*.
+              - Выберите папку **«Доверенные лица»** *(Trusted People)* или **«Доверенные корневые центры сертификации»** $\rightarrow$ нажмите *ОК* $\rightarrow$ *Далее* $\rightarrow$ *Готово*.
+            3. **Запустите установщик:** дважды кликните по файлу `.msix` и нажмите кнопку **«Установить»**.
+
+            ---
+            ### 📝 Что нового в этом релизе:
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
