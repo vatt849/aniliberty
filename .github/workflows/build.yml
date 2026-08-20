@@ -50,6 +50,8 @@ jobs:
           /p:Configuration=${{ env.Configuration }} `
           /p:Platform=${{ env.Platform }} `
           /p:RuntimeIdentifier=win-${{ env.Platform }} `
+          /p:SelfContained=true `
+          /p:PublishTrimmed=false `
           /p:GenerateAppxPackageOnBuild=true `
           /p:AppxPackageSigningEnabled=true `
           /p:UapAppxPackageBuildMode=SideloadOnly `
