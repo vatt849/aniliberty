@@ -1,14 +1,13 @@
 ﻿using aniliberty.Api.Data.Releases;
 using aniliberty.Api.Data.Schedule;
-using aniliberty.Api.Exceptions;
 using aniliberty.Api.Requests;
 using aniliberty.Api.Responses;
 using aniliberty.Helpers;
 using Flurl;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Net;
 
 namespace aniliberty.Api;
 
@@ -109,5 +108,21 @@ internal class Client
         var response = await service.GetAsync(url);
 
         return response.StatusCode == HttpStatusCode.OK;
+    }
+
+    public async Task<List<Release>> Search(string queryString)
+    {
+        var url = new Url(API_BASE)
+            .AppendPathSegment("/app/search/releases")
+            .SetQueryParams(new
+            {
+                query = queryString
+            });
+
+        var response = await service.GetAsync(url);
+
+        response.Validate();
+
+        return JsonSerializer.Deserialize<List<Release>>(response.Content);
     }
 }

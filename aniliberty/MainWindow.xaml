@@ -5,6 +5,7 @@
         xmlns:local="using:aniliberty"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:adr="using:aniliberty.Api.Data.Releases"
         mc:Ignorable="d"
         Title="{x:Bind TitleText, Mode=OneWay}">
 
@@ -71,14 +72,74 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <AutoSuggestBox Grid.Column="0"
+                    <AutoSuggestBox x:Name="SearchSuggestBox"
+                                    Grid.Column="0"
                                     QueryIcon="Find"
                                     AutomationProperties.Name="Search"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Stretch"
                                     MinWidth="220"
                                     MaxWidth="500"
-                                    PlaceholderText="Поиск по каталогу..."/>
+                                    PlaceholderText="Поиск по каталогу..."
+                                    TextChanged="SearchSuggestBox_TextChanged"
+                                    SuggestionChosen="SearchSuggestBox_SuggestionChosen"
+                                    GotFocus="SearchSuggestBox_GotFocus"
+                                    LostFocus="SearchSuggestBox_LostFocus">
+                        <AutoSuggestBox.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment"
+                                        Value="Stretch" />
+                                <Setter Property="Padding"
+                                        Value="0" />
+                            </Style>
+                        </AutoSuggestBox.ItemContainerStyle>
+                        <AutoSuggestBox.ItemTemplate>
+                            <DataTemplate x:DataType="adr:Release">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="12"
+                                            Padding="8">
+                                    <Image Width="50"
+                                           Stretch="UniformToFill"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Source="{x:Bind ThumbnailUrl}" />
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="{x:Bind Title}"
+                                                   FontWeight="Bold"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Text="{x:Bind Name.English}"
+                                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="4"
+                                                    Padding="0,4"
+                                                    VerticalAlignment="Center">
+                                            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                                    CornerRadius="12"
+                                                    Padding="10,4"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind Year}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           FontWeight="SemiBold" />
+                                            </Border>
+                                            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                                    CornerRadius="12"
+                                                    Padding="10,4"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind Type.Description}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           FontWeight="SemiBold"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </AutoSuggestBox.ItemTemplate>
+                    </AutoSuggestBox>
                 </Grid>
             </TitleBar.Content>
         </TitleBar>

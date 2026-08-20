@@ -54,8 +54,8 @@ namespace aniliberty.Api.Data.Releases
         public int? AverageDurationOfEpisode { get; set; }
 
         public string Title { get => Name.Main; }
-        public string PosterUrl { get => Static.ToFullUrl(Poster.Src); }
-        public string ThumbnailUrl { get => Static.ToFullUrl(Poster.Thumbnail); }
+        public string PosterUrl { get => Static.ToFullUrl(!string.IsNullOrEmpty(Poster.Optimized.Src) ? Poster.Optimized.Src : Poster.Src); }
+        public string ThumbnailUrl { get => Static.ToFullUrl(!string.IsNullOrEmpty(Poster.Optimized.Thumbnail) ? Poster.Optimized.Thumbnail : Poster.Thumbnail); }
         public string InFavorites { get => AddedInUsersFavorites > 1000 ? $"{AddedInUsersFavorites / 1000.0}K" : $"{AddedInUsersFavorites}"; }
         public string ShortDescription
         {

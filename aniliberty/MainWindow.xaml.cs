@@ -1,11 +1,16 @@
+using aniliberty.Api;
+using aniliberty.Api.Data.Releases;
 using aniliberty.Helpers;
+using aniliberty.Helpers.Xaml;
 using aniliberty.Pages;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Windows.Media;
 using Windows.UI.WindowManagement;
@@ -26,6 +31,7 @@ public sealed partial class MainWindow : Window
     public string SubtitleText = "TEST";
     public Visibility FavMenuVisible => Visibility.Collapsed;
 
+    private readonly Client apiClient = new();
 
     private Microsoft.UI.Windowing.AppWindow _appWindow;
 
@@ -38,7 +44,7 @@ public sealed partial class MainWindow : Window
 
         // 2. Get the low-level AppWindow reference
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(
-            WinRT.Interop.WindowNative.GetWindowHandle(this)
+            WindowNative.GetWindowHandle(this)
         );
         _appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
 
@@ -65,7 +71,7 @@ public sealed partial class MainWindow : Window
 
     // Wraps a call to rootFrame.Navigate to give the Page a way to know which NavigationRootPage is navigating.
     // Please call this function rather than rootFrame.Navigate to navigate the rootFrame.
-    public void Navigate(Type pageType, object? targetPageArguments = null, NavigationTransitionInfo? navigationTransitionInfo = null)
+    public void Navigate(System.Type pageType, object? targetPageArguments = null, NavigationTransitionInfo? navigationTransitionInfo = null)
     {
         RootFrame.Navigate(pageType, targetPageArguments, navigationTransitionInfo);
     }
@@ -112,8 +118,7 @@ public sealed partial class MainWindow : Window
 
             Debugger.WriteLine($"navigate to page: {tag}", DebuggerCategory.Navigation);
             Debugger.WriteLine($"user session is active: {AppSettings.IsSessionActive()}", DebuggerCategory.Settings);
-
-            Type navPageType = Type.GetType(tag);
+            System.Type navPageType = System.Type.GetType(tag);
             MainNav_Navigate(navPageType, args.RecommendedNavigationTransitionInfo);
         }
     }
@@ -145,8 +150,6 @@ public sealed partial class MainWindow : Window
 
     private void MainNav_Navigate(System.Type navPageType, NavigationTransitionInfo transitionInfo)
     {
-        // Get the page type before navigation so you can prevent duplicate
-        // entries in the backstack.
         System.Type preNavPageType = RootFrame.CurrentSourcePageType;
 
         // Only navigate if the selected page isn't currently loaded.
@@ -249,5 +252,64 @@ public sealed partial class MainWindow : Window
                     break;
             }
         });
+    }
+
+    private async void SearchSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+            return;
+
+        var searchText = sender.Text.Trim();
+        if (string.IsNullOrEmpty(searchText))
+        {
+            sender.ItemsSource = null;
+            return;
+        }
+
+        sender.ItemsSource = await apiClient.Search(searchText);
+
+        foreach (var item in sender.ItemsSource as List<Release>)
+        {
+            Debugger.WriteLine($"search suggest: {item.ID} - {item.ThumbnailUrl}", DebuggerCategory.API);
+        }
+    }
+
+    private void SearchSuggestBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is Release selected)
+        {
+            sender.Text = ""; // Set the text input to chosen value
+            App.MainWindow.Navigate(typeof(ReleasePage), selected.ID);
+
+            Popup? suggestionsPopup = Helper.FindNamedChild<Popup>(sender, "SuggestionsPopup");
+
+            suggestionsPopup?.IsOpen = false;
+        }
+    }
+
+    private void SearchSuggestBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is AutoSuggestBox autoSuggestBox)
+        {
+            // Optional: Only show suggestions if there is already text entered
+            if (!string.IsNullOrEmpty(autoSuggestBox.Text))
+            {
+                // Find the internal Popup using VisualTreeHelper
+                Popup? suggestionsPopup = Helper.FindNamedChild<Popup>(autoSuggestBox, "SuggestionsPopup");
+
+                suggestionsPopup?.IsOpen = true;
+            }
+        }
+    }
+
+    private void SearchSuggestBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is AutoSuggestBox autoSuggestBox)
+        {
+            // Find the internal Popup using VisualTreeHelper
+            Popup? suggestionsPopup = Helper.FindNamedChild<Popup>(autoSuggestBox, "SuggestionsPopup");
+
+            suggestionsPopup?.IsOpen = false;
+        }
     }
 }
