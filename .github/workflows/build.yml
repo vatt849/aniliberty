@@ -11,8 +11,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      Solution_Name: aniliberty.slnx # Replace with your solution file name
-      Project_Path: aniliberty/aniliberty.csproj # Replace with your WinUI 3 project path
+      Project_Path: aniliberty/aniliberty.csproj
       Configuration: Release
       Platform: x64
 
@@ -23,26 +22,36 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.x # Matches your project's target .NET framework
+        dotnet-version: 10.x
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
+    # Восстанавливаем пакеты строго для целевого проекта и платформы x64
     - name: Restore NuGet Packages
-      run: msbuild ${{ env.Solution_Name }} -t:Restore -p:Configuration=${{ env.Configuration }}
+      run: |
+        msbuild ${{ env.Project_Path }} `
+          -t:Restore `
+          /p:Configuration=${{ env.Configuration }} `
+          /p:Platform=${{ env.Platform }} `
+          /p:RuntimeIdentifier=win-${{ env.Platform }}
 
     - name: Decode Signing Certificate
       shell: powershell
       run: |
-        # Creates the certificate file locally from GitHub Secrets
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_PFX }}")
-        [System.IO.File]::WriteAllBytes("${{ github.workspace }}\GitHubActionsWorkflow.pfx", $pfx_cert_byte)
+        if ("${{ secrets.BASE64_PFX }}" -ne "") {
+          $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_PFX }}")
+          [System.IO.File]::WriteAllBytes("${{ github.workspace }}\GitHubActionsWorkflow.pfx", $pfx_cert_byte)
+        }
 
     - name: Build and Package MSIX
       run: |
         msbuild ${{ env.Project_Path }} `
           /p:Configuration=${{ env.Configuration }} `
           /p:Platform=${{ env.Platform }} `
+          /p:RuntimeIdentifier=win-${{ env.Platform }} `
+          /p:GenerateAppxPackageOnBuild=true `
+          /p:AppxPackageSigningEnabled=true `
           /p:UapAppxPackageBuildMode=SideloadOnly `
           /p:AppxBundle=Never `
           /p:PackageCertificateKeyFile="${{ github.workspace }}\GitHubActionsWorkflow.pfx" `
@@ -52,4 +61,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: WinUI3-MSIX-Package
-        path: AppPackages/
+        path: aniliberty/AppPackages/ # Путь к папке AppPackages относительно корня
