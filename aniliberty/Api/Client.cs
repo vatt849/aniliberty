@@ -119,10 +119,31 @@ internal class Client
                 query = queryString
             });
 
+        Debugger.WriteLine($"search releases: {url}", DebuggerCategory.API);
+
         var response = await service.GetAsync(url);
 
         response.Validate();
 
         return JsonSerializer.Deserialize<List<Release>>(response.Content);
+    }
+
+    public async Task<PaginatedResponse<ReleaseCatalog>> GetCatalogPaginated(int page, int limit)
+    {
+        var url = new Url(API_BASE)
+            .AppendPathSegment("/anime/catalog/releases")
+            .SetQueryParams(new
+            {
+                page,
+                limit,
+            });
+
+        Debugger.WriteLine($"get paginated catalog: {url}", DebuggerCategory.API);
+
+        var response = await service.GetAsync(url);
+
+        response.Validate();
+
+        return JsonSerializer.Deserialize<PaginatedResponse<ReleaseCatalog>>(response.Content);
     }
 }

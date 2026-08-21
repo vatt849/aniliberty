@@ -10,7 +10,6 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Windows.Media;
 using Windows.UI.WindowManagement;
@@ -267,11 +266,6 @@ public sealed partial class MainWindow : Window
         }
 
         sender.ItemsSource = await apiClient.Search(searchText);
-
-        foreach (var item in sender.ItemsSource as List<Release>)
-        {
-            Debugger.WriteLine($"search suggest: {item.ID} - {item.ThumbnailUrl}", DebuggerCategory.API);
-        }
     }
 
     private void SearchSuggestBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)

@@ -1,14 +1,13 @@
 ﻿using aniliberty.Api.Data.Common;
-using aniliberty.Api.Data.Releases;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace aniliberty.Api.Responses;
 
-public class PaginatedResponse
+public class PaginatedResponse<T>
 {
     [JsonPropertyName("data")]
-    public List<Release> List { get; set; }
+    public List<T> List { get; set; }
     [JsonPropertyName("meta")]
     public PaginatedResponseMeta Meta { get; set; }
 }

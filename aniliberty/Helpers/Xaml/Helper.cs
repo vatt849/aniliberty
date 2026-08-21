@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Media;
 
 namespace aniliberty.Helpers.Xaml;
 
-class Helper
+internal class Helper
 {
     // Helper method to look into the control's template
     public static T? FindNamedChild<T>(DependencyObject parent, string name) where T : DependencyObject
